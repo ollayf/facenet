@@ -43,3 +43,24 @@ To download the pre-trained models by the original user:
 python download_models.py
 ```
 You can configure the directory to download the models within the script  
+
+### Usage
+The original authors main thought process was this. It follows the original 3 step process of face recognition:
+1. Face Detection (+ cropping and alignment)  
+2. Generating Face Embeddings  
+3. Calculating Difference between embeddings of different images
+
+Here he uses MTCNN to do face detection, cropping and alignment is just the process to convert the face into
+into a homogeneous shape/ size for training/ inference. Then he does a prewhitening step (preprocessing) which supposedly in an attempt to homogenise. Following that, he will generate enmbeddings for the face. This embeddings generated is meant to then be compared across a database of other embeddings, typically using the Eucludian Distance metric. it then just give you a value which should not be attempted to be converted into a percentage value because MATH!  
+
+For now theres only **4 main scripts** to use:  
+- decode images:
+I did NOT get this to work so don't ask me how to do it yet, i think there were problems with me downloading it  
+- download_models.py
+This is just a wrapper around his download and extract models script, but you can just run it and put in the MODEL_DIR to tell it where to downlaod the models from. more info about the mdoels from prev_README.md or check out the original post  
+- face_detection.py  
+This is supposed to be part of the main app that does the face detection (and alignment). I have written some notes that i have received as I was cleaning it up.  
+- src/compare.py
+This allows you to make comparison (using Euclidean Distance) between multiple  (>=2) images. This is good because it also helps you to generate a confusion matrix!! Use my compare.sh (or.bat for windows users) file to access this script. All you need to do is to change the path to the model and images. first argument is model and every subsequent argument your input will be considered as the images unless you add in additional flags  
+
+### Remarks
