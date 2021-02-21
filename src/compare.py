@@ -35,6 +35,7 @@ import copy
 import argparse
 import facenet
 import align.detect_face
+import cv2
 
 def main(args):
 
@@ -81,8 +82,16 @@ def load_and_align_data(image_paths, image_size, margin, gpu_memory_fraction):
     minsize = 20 # minimum size of face
     threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
     factor = 0.709 # scale factor
-    
+
+    # for displaying the original images. can remove if you want
+    for img in image_paths:
+        cv2.imshow(img, cv2.imread(img))
+        key = cv2.waitKey(0) & 0xFF
+        if key == ord('q'):
+            continue
+
     print('Creating networks and loading parameters')
+
     with tf.Graph().as_default():
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_memory_fraction)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
@@ -92,23 +101,33 @@ def load_and_align_data(image_paths, image_size, margin, gpu_memory_fraction):
     tmp_image_paths=copy.copy(image_paths)
     img_list = []
     for image in tmp_image_paths:
-        img = misc.imread(os.path.expanduser(image), mode='RGB')
-        img_size = np.asarray(img.shape)[0:2]
+        img = cv2.imread(os.path.expanduser(image))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img_size = img.shape
         bounding_boxes, _ = align.detect_face.detect_face(img, minsize, pnet, rnet, onet, threshold, factor)
         if len(bounding_boxes) < 1:
           image_paths.remove(image)
           print("can't detect face, remove ", image)
           continue
+
+        print('bb', bounding_boxes)
+        print('bb shape', bounding_boxes.shape)
         det = np.squeeze(bounding_boxes[0,0:4])
+        print('det', det)
+        print('det shape', det.shape)
         bb = np.zeros(4, dtype=np.int32)
         bb[0] = np.maximum(det[0]-margin/2, 0)
         bb[1] = np.maximum(det[1]-margin/2, 0)
         bb[2] = np.minimum(det[2]+margin/2, img_size[1])
         bb[3] = np.minimum(det[3]+margin/2, img_size[0])
         cropped = img[bb[1]:bb[3],bb[0]:bb[2],:]
-        aligned = misc.imresize(cropped, (image_size, image_size), interp='bilinear')
+        aligned = cv2.resize(cropped, (image_size, image_size), interpolation=cv2.INTER_LINEAR)
         prewhitened = facenet.prewhiten(aligned)
         img_list.append(prewhitened)
+        # cv2.imshow(image, prewhitened)
+        # key = cv2.waitKey(0) & 0xFF
+        # if key == ord('q'):
+        #     continue
     images = np.stack(img_list)
     return images
 

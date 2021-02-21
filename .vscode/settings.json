@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "facenet/bin/python",
+    "python.linting.pylintEnabled": true
+}

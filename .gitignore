@@ -92,3 +92,10 @@ ENV/
 
 # PyCharm project setting
 .idea
+
+# new additions
+celeb_data/*
+crops/*
+data/*
+facenet
+models/*

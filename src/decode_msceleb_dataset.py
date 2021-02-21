@@ -71,6 +71,8 @@ def main(args):
             if not os.path.exists(full_class_dir):
                 os.mkdir(full_class_dir)
             full_path = os.path.join(full_class_dir, img_name.replace('/','_'))
+            if img is None:
+                continue
             cv2.imwrite(full_path, img) #pylint: disable=maybe-no-member
             print('%8d: %s' % (i, full_path))
             i += 1
